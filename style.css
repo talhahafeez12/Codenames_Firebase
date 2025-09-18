@@ -1,0 +1,81 @@
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f0f2f5;
+    color: #333;
+    text-align: center;
+}
+
+h1 {
+    margin-top: 20px;
+}
+
+/* Flex container for 3 columns */
+body > div {
+    box-sizing: border-box;
+}
+
+#blue_side, #board, #red_side {
+    padding: 20px;
+}
+
+#blue_side, #red_side {
+    width: 5%;
+    min-width: 150px;
+    background-color: #dceeff;
+    border-radius: 8px;
+    margin: 10px;
+}
+
+#red_side {
+    background-color: #ffdce0;
+}
+
+#board {
+    flex: 1;
+    background-color: #ffffff;
+    border-radius: 8px;
+    margin: 10px;
+    overflow-x: auto;
+}
+
+.game {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+.main-content {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    width: 100%;
+    max-width: 1200px;
+    margin-top: 20px;
+}
+
+/* Board table styling */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: auto;
+}
+
+td.card {
+    width: 100px;
+    height: 60px;
+    background-color: #e0e0e0;
+    border: 2px solid #ccc;
+    border-radius: 6px;
+    margin: 4px;
+    text-align: center;
+    vertical-align: middle;
+    font-weight: bold;
+    font-size: 16px;
+}
+
+td.card:hover {
+    background-color: #cce7ff;
+    cursor: pointer;
+}

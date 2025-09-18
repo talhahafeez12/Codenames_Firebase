@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Codenames</title>
+        <link rel="stylesheet" href="style.css">
+        <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+        <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
+    </head>
+    <body>
+        <h1>Codenames</h1>
+        <div class="game" style="display: none;">
+            <div id="blue_side">
+                <p id="blue_players"></p>
+                <button id="join_team_blue">Join Team</button>
+                <button id="be_spy_master_blue" style="display: none">Be Spy Master</button>
+            </div>
+            <div id="board" class="board">
+                <table>
+                    <tr id="row_1"><td id="col_11" class="card"></td><td id="col_12" class="card"></td><td id="col_13" class="card"></td><td id="col_14" class="card"></td><td id="col_15" class="card"></td></tr>
+                    <tr id="row_2"><td id="col_21" class="card"></td><td id="col_22" class="card"></td><td id="col_23" class="card"></td><td id="col_24" class="card"></td><td id="col_25" class="card"></td></tr>
+                    <tr id="row_3"><td id="col_31" class="card"></td><td id="col_32" class="card"></td><td id="col_33" class="card"></td><td id="col_34" class="card"></td><td id="col_35" class="card"></td></tr>
+                    <tr id="row_4"><td id="col_41" class="card"></td><td id="col_42" class="card"></td><td id="col_43" class="card"></td><td id="col_44" class="card"></td><td id="col_45" class="card"></td></tr>
+                    <tr id="row_5"><td id="col_51" class="card"></td><td id="col_52" class="card"></td><td id="col_53" class="card"></td><td id="col_54" class="card"></td><td id="col_55" class="card"></td></tr>
+                </table>
+            </div>
+            <div id="red_side">
+                <p id="red_players"></p>
+                <button id="join_team_red">Join Team</button>
+                <button id="be_spy_master_red" style="display: none">Be Spy Master</button>
+            </div>
+        </div>
+        <button id="new_game_button">New Game</button>
+        <button id="dup_game_button" style="display: none">New Game</button>
+        <button id="join_game_button">Join Game</button>
+        <script type="module" src="script.js"></script>
+    </body>
+</html>

@@ -1,0 +1,12 @@
+games: {
+  GAME_ID: {
+    board: [ { word: "apple", color: "red", revealed: false }, ... ],
+    teams: {
+      red: { spymaster: "uid1", operatives: ["uid2"] },
+      blue: { spymaster: "uid3", operatives: ["uid4"] }
+    },
+    currentTurn: "red",
+    revealedWords: [],
+    chat: [ { user: "uid2", message: "Try 'fruit'" }, ... ]
+  }
+}
