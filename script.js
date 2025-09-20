@@ -11,6 +11,8 @@ var global_user_turn = "red";
 var global_user_team = "";
 var global_game_id = "";
 
+
+
 function new_game_id() {
     var game_id = "";
     while (game_id == "") {
@@ -23,6 +25,20 @@ function new_game_id() {
             document.getElementById("dup_game_button").style.display = "block";
             document.getElementById("new_game_button").style.display = "none";
             new_game(game_id);
+
+            db.ref(`games/${game_id}`).on('value', (snapshot) => {
+                const data = snapshot.val();
+                if (data) {
+                    if (data['currentTurn'] == 'red') {
+                        document.getElementById('current_turn').innerText = 'Current Turn: Red';
+                        global_user_turn = 'red';
+                    } else {
+                        document.getElementById('current_turn').innerText = 'Current Turn: Blue';
+                        global_user_turn = 'blue';
+                    }   
+                }
+            });
+
         } else {
             window.alert("Please enter a different Game Id.")
             new_game_id();
@@ -104,6 +120,7 @@ function new_game(game_id) {
     }
 
     document.getElementById("join_game_button").style.display = "none";
+    document.getElementById('current_turn').style.display = 'block';
     const gameRef = db.ref(`games/${game_id}`);
     gameRef.set({
         board: board_var,
@@ -219,6 +236,19 @@ function join_game() {
             window.alert("Enter Valid Game Id");
             join_game();
         } else {
+            global_game_id = game_id;
+            db.ref(`games/${game_id}`).on('value', (snapshot) => {
+                const data = snapshot.val();
+                if (data) {
+                    if (data['currentTurn'] == 'red') {
+                        document.getElementById('current_turn').innerText = 'Current Turn: Red';
+                        global_user_turn = 'red';
+                    } else {
+                        document.getElementById('current_turn').innerText = 'Current Turn: Blue';
+                        global_user_turn = 'blue';
+                    }   
+                }
+            });
             set_old_game(snapshot.val());
         }
     });
@@ -238,6 +268,7 @@ function set_old_game(old_game) {
     }
     document.getElementById("join_game_button").style.display = "none";
     document.getElementsByClassName("game")[0].style.display = "flex";
+    document.getElementById('current_turn').style.display = 'block';
 
     // Set Old Team
     if ("teams" in old_game) {
@@ -286,28 +317,27 @@ function word_click(id) {
         let wordRef = db.ref(`games/${global_game_id}/board/${word_index}`); 
         wordRef.once("value").then((snapshot) => {
             word_color = snapshot.val()['color'];
-            if (word_color == global_user_team) {
-                const revWordRef = db.ref(`games/${global_game_id}/revealedWords/${word_text}`); 
-                revWordRef.once("value").then((snapshot) => {
-                    if (!snapshot.exists()) { 
-                        wordRef.update({ revealed: true });
-                        revWordRef.push(id);
-                    } else {
-                        return;
+            const revWordRef = db.ref(`games/${global_game_id}/revealedWords/${word_text}`);
+            revWordRef.once("value").then((snapshot) => {
+            // Fix this code
+                if (!snapshot.exists()) {
+                    document.getElementById(id).style.backgroundColor = word_color;
+                    wordRef.update({ revealed: true });
+                    revWordRef.push(id);
+                    if (word_color != global_user_team) {
+                        if (global_user_team == "red") {
+                            global_user_turn = "blue";
+                            db.ref(`games/${global_game_id}`).update({ currentTurn: "blue"});
+                        } else {
+                            global_user_turn = "red";
+                            db.ref(`games/${global_game_id}`).update({ currentTurn: "red"});
+                        }
                     }
-                });
-            } 
-            // else if (word_color == "black") {
-            //     // TODO
-            // } 
-            else {
-                document.getElementById(id).style.backgroundColor = word_color;
-                if (global_user_turn == "red") {
-                    global_user_turn = "blue";
+                    return;
                 } else {
-                    global_user_turn = "red";
+                    return;
                 }
-            }
+            });
         });
         
     }
