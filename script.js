@@ -12,7 +12,6 @@ var global_user_team = "";
 var global_game_id = "";
 
 
-
 function new_game_id() {
     var game_id = "";
     while (game_id == "") {
@@ -46,7 +45,7 @@ function new_game_id() {
     });
 }
 
-function new_game(game_id) {
+function new_game() {
     document.getElementsByClassName("game")[0].style.display = "flex";
     const words = [
         "apple", "river", "doctor", "moon", "bottle", "guitar", "train", "paper", "storm", "chair",
@@ -75,7 +74,7 @@ function new_game(game_id) {
     while (true) {
         const randomIndex = Math.floor(Math.random() * words.length);
         if (!(words[randomIndex] in checked_words)) {
-            board_var.push({'word': words[randomIndex], 'color': 'white', 'revealed': 'false'});
+            board_var.push({'word': words[randomIndex], 'color': 'white', 'revealed': false});
             checked_words.push(words[randomIndex]);
         }
         if (board_var.length == 25) {
@@ -121,11 +120,71 @@ function new_game(game_id) {
 
     document.getElementById("join_game_button").style.display = "none";
     document.getElementById('current_turn').style.display = 'block';
-    const gameRef = db.ref(`games/${game_id}`);
+    const gameRef = db.ref(`games/${global_game_id}`);
     gameRef.set({
         board: board_var,
         currentTurn: "red",
         revealedWords: [],
+    });
+    db.ref(`games/${global_game_id}/board/0/word`).on('value', () => {
+        db.ref(`games/${global_game_id}/board`).once('value', (snapshot1) => {
+            var full_board = snapshot1.val();
+            var row = 1;
+            var col = 1;
+            for (let i = 0; i < full_board.length; i++) {
+                document.getElementById("col_" + row + col).innerText = full_board[i].word;
+                col += 1;
+                if (col > 5) {
+                    col = 1;
+                    row += 1;
+                }
+            }
+        })
+    });
+    db.ref(`games/${global_game_id}/teams`).on('value', (snapshot) => {
+        var data = snapshot.val();
+        if (data && 'red' in data) {
+            document.getElementById("red_players").innerHTML = "";
+            if ('operatives' in data['red']) {
+                var all_operatives = Object.keys(data['red']['operatives']);
+                for (let i = 0; i < all_operatives.length; i++) {
+                    const h4Element = document.createElement("h4");
+                    h4Element.textContent = all_operatives[i];
+                    document.getElementById("red_players").appendChild(h4Element);
+                }
+            } else if ('spymaster' in data['red']) {
+                const h4Element = document.createElement("h4");
+                h4Element.textContent = data['red']['spymaster']['id'];
+                document.getElementById("red_players").appendChild(h4Element);
+            }
+        } 
+        
+        if (data && 'blue' in data) {
+            document.getElementById("blue_players").innerHTML = "";
+            if ('operatives' in data['blue']) {
+                var all_operatives = Object.keys(data['blue']['operatives']);
+                for (let i = 0; i < all_operatives.length; i++) {
+                    const h4Element = document.createElement("h4");
+                    h4Element.textContent = all_operatives[i];
+                    document.getElementById("blue_players").appendChild(h4Element);
+                }
+            } else if ('spymaster' in data['blue']) {
+                const h4Element = document.createElement("h4");
+                h4Element.textContent = data['blue']['spymaster']['id'];
+                document.getElementById("blue_players").appendChild(h4Element);
+            }
+        }
+    });
+    db.ref(`games/${global_game_id}/board`).on('value', (snapshot) => {
+        var full_board = snapshot.val();
+        for (let i = 0; i < full_board.length; i++) {
+            if (full_board[i].revealed) {
+                var word_row = Math.floor(i / 5) + 1;
+                var word_col = (i % 5) + 1;
+                var word_id = ("col_" + word_row) + word_col;
+                document.getElementById(word_id).style.backgroundColor = full_board[i].color;
+            }
+        }
     });
 }
 
@@ -142,10 +201,6 @@ function join_team_red() {
     document.getElementById("join_team_blue").style.display = "none";
     global_user_status = "operative";
     global_user_team = "red";
-
-    const h4Element = document.createElement("h4");
-    h4Element.textContent = user_id;
-    document.getElementById("red_players").appendChild(h4Element);
 
     const userRef = db.ref(`games/${global_game_id}/teams/red/spymaster`); 
     userRef.once("value").then((snapshot) => {
@@ -167,10 +222,6 @@ function join_team_blue() {
     gameRef.push("");
     document.getElementById("join_team_blue").style.display = "none";
     document.getElementById("join_team_red").style.display = "none";
-
-    const h4Element = document.createElement("h4");
-    h4Element.textContent = user_id;
-    document.getElementById("blue_players").appendChild(h4Element);
 
     const userRef = db.ref(`games/${global_game_id}/teams/blue/spymaster`); 
     userRef.once("value").then((snapshot) => {
@@ -266,6 +317,9 @@ function set_old_game(old_game) {
             row += 1;
         }
     }
+
+    document.getElementById("dup_game_button").style.display = "block";
+    document.getElementById("new_game_button").style.display = "none";
     document.getElementById("join_game_button").style.display = "none";
     document.getElementsByClassName("game")[0].style.display = "flex";
     document.getElementById('current_turn').style.display = 'block';
@@ -305,6 +359,65 @@ function set_old_game(old_game) {
 
     // Set Team Turn
     global_user_turn = old_game["currentTurn"];
+    db.ref(`games/${global_game_id}/board/0/word`).on('value', (snapshot) => {
+        db.ref(`games/${global_game_id}/board`).once('value', (snapshot1) => {
+            var full_board = snapshot1.val();
+            var row = 1;
+            var col = 1;
+            for (let i = 0; i < full_board.length; i++) {
+                document.getElementById("col_" + row + col).innerText = full_board[i].word;
+                col += 1;
+                if (col > 5) {
+                    col = 1;
+                    row += 1;
+                }
+            }
+        })
+    });
+    db.ref(`games/${global_game_id}/teams`).on('value', (snapshot) => {
+        var data = snapshot.val();
+        if (data && 'red' in data) {
+            document.getElementById("red_players").innerHTML = "";
+            if ('operatives' in data['red']) {
+                var all_operatives = Object.keys(data['red']['operatives']);
+                for (let i = 0; i < all_operatives.length; i++) {
+                    const h4Element = document.createElement("h4");
+                    h4Element.textContent = all_operatives[i];
+                    document.getElementById("red_players").appendChild(h4Element);
+                }
+            } else if ('spymaster' in data['red']) {
+                const h4Element = document.createElement("h4");
+                h4Element.textContent = data['red']['spymaster']['id'];
+                document.getElementById("red_players").appendChild(h4Element);
+            }
+        }
+        if (data && 'blue' in data) {
+            document.getElementById("blue_players").innerHTML = "";
+            if ('operatives' in data['blue']) {
+                var all_operatives = Object.keys(data['blue']['operatives']);
+                for (let i = 0; i < all_operatives.length; i++) {
+                    const h4Element = document.createElement("h4");
+                    h4Element.textContent = all_operatives[i];
+                    document.getElementById("blue_players").appendChild(h4Element);
+                }
+            } else if ('spymaster' in data['blue']) {
+                const h4Element = document.createElement("h4");
+                h4Element.textContent = data['blue']['spymaster']['id'];
+                document.getElementById("blue_players").appendChild(h4Element);
+            }
+        }
+    });
+    db.ref(`games/${global_game_id}/board`).on('value', (snapshot) => {
+        var full_board = snapshot.val();
+        for (let i = 0; i < full_board.length; i++) {
+            if (full_board[i].revealed) {
+                var word_row = Math.floor(i / 5) + 1;
+                var word_col = (i % 5) + 1;
+                var word_id = ("col_" + word_row) + word_col;
+                document.getElementById(word_id).style.backgroundColor = full_board[i].color;
+            }
+        }
+    });
 }
 
 function word_click(id) {
@@ -319,7 +432,6 @@ function word_click(id) {
             word_color = snapshot.val()['color'];
             const revWordRef = db.ref(`games/${global_game_id}/revealedWords/${word_text}`);
             revWordRef.once("value").then((snapshot) => {
-            // Fix this code
                 if (!snapshot.exists()) {
                     document.getElementById(id).style.backgroundColor = word_color;
                     wordRef.update({ revealed: true });
